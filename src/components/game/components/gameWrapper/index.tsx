@@ -1,15 +1,18 @@
 import "./styles.css";
 import React, { ReactNode } from "react";
 import type { TBoardColor } from "../../../../interfaces";
-import { EBoardColor } from "../../../../utils/constants";
+import { EBoardColorWithInitial } from "../../../../utils/constants";
+// import { EBoardColor } from "../../../../utils/constants";
+
+type IBackgroud = TBoardColor | "INITIAL";
 
 interface GameWrapperProps {
-  currentColor?: TBoardColor;
+  currentColor?: IBackgroud;
   children: JSX.Element | JSX.Element[] | ReactNode;
 }
 
 const GameWrapper = ({
-  currentColor = EBoardColor.BLUE,
+  currentColor = EBoardColorWithInitial.INITIAL,
   children,
 }: GameWrapperProps) => (
   <div className={`game-wrapper ${currentColor.toLowerCase()}`}>{children}</div>

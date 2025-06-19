@@ -1,5 +1,4 @@
 import "./styles.css";
-import { calculateIndicesMatrix } from "../../../../utils/calculateIndicesMatrix";
 import {
   BOARD_SIZE,
   EBoardColor,
@@ -91,7 +90,6 @@ const Line = ({
           type,
           row,
           col,
-          indices: calculateIndicesMatrix(row, col, type),
         })
       }
     >

@@ -25,6 +25,12 @@ export enum EBoardColor {
   RED = "RED",
 }
 
+export enum EBoardColorWithInitial {
+  INITIAL = "INITIAL",
+  BLUE = EBoardColor.BLUE,
+  RED = EBoardColor.RED,
+}
+
 document.documentElement.style.setProperty("--base-height", `${BASE_HEIGHT}px`);
 document.documentElement.style.setProperty("--base-width", `${BASE_WIDTH}px`);
 document.documentElement.style.setProperty("--tile-size", `${TILE_SIZE}px`);
