@@ -1,0 +1,18 @@
+.game-wrapper {
+  --bg-red: #f9a27e;
+  --bg-blue: #6eb8d8;
+  align-items: center;
+  display: flex;
+  height: 100%;
+  justify-content: center;
+  width: 100%;
+  flex-direction: column;
+}
+
+.game-wrapper.red {
+  background-color: var(--bg-red);
+}
+
+.game-wrapper.blue {
+  background-color: var(--bg-blue);
+}
