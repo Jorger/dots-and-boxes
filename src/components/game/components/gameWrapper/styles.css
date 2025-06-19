@@ -1,12 +1,21 @@
 .game-wrapper {
   --bg-red: #f9a27e;
   --bg-blue: #6eb8d8;
+  --bg-initial: #bf97ef;
+}
+
+.game-wrapper {
   align-items: center;
   display: flex;
+  flex-direction: column;
   height: 100%;
   justify-content: center;
+  transition: all 0.5s linear;
   width: 100%;
-  flex-direction: column;
+}
+
+.game-wrapper.initial {
+  background-color: var(--bg-initial);
 }
 
 .game-wrapper.red {
