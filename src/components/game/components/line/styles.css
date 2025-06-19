@@ -1,0 +1,119 @@
+.game-line {
+  --line-red: #fe7f78;
+  --line-blue: #04d6ff;
+  --box-red: #ff5f58;
+  --box-blue: #03c9f3;
+  position: absolute;
+  -webkit-tap-highlight-color: transparent;
+  background-color: rgba(255, 255, 255, 0.7);
+  border: none;
+  cursor: pointer;
+
+  /* TODO: remover */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  font-weight: bold;
+  color: black;
+}
+
+/* .game-line:hover {
+  background-color: red;
+} */
+
+/* .game-line.horizontal {
+  box-shadow: 3px 1px 1px rgb(0 0 0 / 57%);
+}
+
+.game-line.vertical {
+  box-shadow: 3px 1px 1px red;
+} */
+
+.game-line.selected.horizontal {
+  --final-background-size: 10% 100%;
+  /* Psar el color dinamicamente */
+  background-image: linear-gradient(var(--line-color), var(--line-color));
+  background-repeat: no-repeat;
+  background-size: var(--final-background-size);
+  background-position: 50% 0;
+  animation: expandBackground var(--time-expand-line) ease forwards;
+}
+
+.game-line.selected.vertical {
+  --final-background-size: 100% 10%;
+  /* Psar el color dinamicamente */
+  background-image: linear-gradient(var(--line-color), var(--line-color));
+  background-repeat: no-repeat;
+  background-size: var(--final-background-size);
+  background-position: 0 50%;
+  animation: expandBackground var(--time-expand-line) ease forwards;
+}
+
+.game-line.completed.horizontal,
+.game-line.completed.vertical {
+  background-image: none;
+  background-color: rgba(65, 67, 66, 0.95);
+}
+
+/* COMPLETED */
+.game-line.horizontal::after,
+.game-line.horizontal.last::before {
+  /* opacity: 0.4; */
+  content: "";
+  position: absolute;
+  width: 20px;
+  height: 20px;
+  background-color: black;
+  left: -25%;
+  top: -45%;
+  border-radius: 50%;
+  pointer-events: none;
+}
+
+.game-line.horizontal.last::before {
+  left: 90%;
+}
+
+.game-line.vertical.filling-box::before {
+  content: "";
+  background-color: rgba(255, 123, 0, 0.4);
+  width: var(--tile-size);
+  height: var(--tile-size);
+  position: absolute;
+  top: 0;
+  left: var(--line-size);
+  transform: scale(0);
+  pointer-events: none;
+  animation: scaleUp var(--time-scale-up) ease-out var(--time-expand-line)
+    forwards;
+}
+
+.game-line.vertical.filling-box.blue::before {
+  background-color: var(--box-blue);
+}
+
+.game-line.vertical.filling-box.red::before {
+  background-color: var(--box-red);
+}
+
+.game-line.vertical.filling-box.last::before {
+  content: none;
+}
+
+@keyframes expandBackground {
+  from {
+    background-size: var(--final-background-size);
+  }
+  to {
+    background-size: 100% 100%;
+  }
+}
+
+@keyframes scaleUp {
+  from {
+    transform: scale(0.4);
+  }
+  to {
+    transform: scale(1);
+  }
+}

@@ -1,0 +1,7 @@
+.game-grid {
+  background-color: rgba(255, 255, 255, 0.5);
+  border-radius: 20px;
+  height: var(--base-width);
+  position: relative;
+  width: var(--base-width);
+}
