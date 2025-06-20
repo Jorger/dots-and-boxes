@@ -1,10 +1,15 @@
-import { BOARD_SIZE, EBoardColor, ELineState } from "./utils/constants";
+import {
+  BOARD_SIZE,
+  EBoardColor,
+  ELineState,
+  ETypeLine,
+} from "./utils/constants";
 import type {
   ChangeGameState,
   GameState,
   IKeyValue,
-  IUIElement,
   Player,
+  TTypeLine,
 } from "./interfaces";
 import { calculateIndicesMatrix } from "./utils/calculateIndicesMatrix";
 
@@ -54,15 +59,20 @@ const getPlayerData = (allPlayerIds: string[]): GameState => {
     players,
     turnID,
     boxes: {},
+    isGameOver: false,
     lines: {
-      HORIZONTAL: {},
-      VERTICAL: {},
+      [ETypeLine.HORIZONTAL]: {},
+      [ETypeLine.VERTICAL]: {},
     },
-    uiElement: [],
   };
 };
 
-const changeGameState = ({ line, game, playerId }: ChangeGameState) => {
+const changeGameState = ({
+  line,
+  game,
+  playerId,
+  allPlayerIds,
+}: ChangeGameState) => {
   const { type, row, col } = line;
   const inRange = lineInRange(row) && lineInRange(col);
 
@@ -74,10 +84,56 @@ const changeGameState = ({ line, game, playerId }: ChangeGameState) => {
    * El jugador que está haciendo el proceso
    */
   const player = game.players.find((v) => v.playerID === playerId);
+  // Traer las celdas del jugador contrario...
+  const currentIndex = allPlayerIds.findIndex((v) => v === playerId);
 
   if (!player) {
     throw Rune.invalidAction();
   }
+
+  /**
+   * Deterina si el usaurio logró completar una caja/box
+   */
+  let completeBox = false;
+
+  /**
+   * Los elementos que ya había sido completados se establece ahora su estado
+   * de tipo commit en true, para así indicar que no es de animación...
+   */
+  // Para las líneas...
+  for (const key in game.lines) {
+    /**
+     * Se castea el tipo ya que key es de tipo string
+     */
+    const keyDirection = key as TTypeLine;
+
+    /**
+     * Se extrae el listado de líneas asociadas al tipo de línea...
+     */
+    const lines = game.lines[keyDirection];
+
+    /**
+     * Se iteran cada una de las líneas, pero sólo
+     * las que estén con isCommit false, luego se establece
+     * que si es true para que en el ui se establezca
+     */
+    Object.keys(lines)
+      .filter((key) => !lines[key as IKeyValue].isCommit)
+      .forEach((key) => {
+        game.lines[keyDirection][key as IKeyValue].state = ELineState.COMPLETED;
+        game.lines[keyDirection][key as IKeyValue].isCommit = true;
+      });
+  }
+
+  // Para las cajas/Boxes, se revisa que ya esté complete, además que no se le haya
+  // hecho commit en el UI
+  Object.keys(game.boxes)
+    .filter(
+      (key) =>
+        game.boxes[key as IKeyValue].isComplete &&
+        !game.boxes[key as IKeyValue].isCommit
+    )
+    .forEach((key) => (game.boxes[key as IKeyValue].isCommit = true));
 
   /**
    * Se extrae el color del jugador que hizo la jugada
@@ -93,9 +149,10 @@ const changeGameState = ({ line, game, playerId }: ChangeGameState) => {
    * Se activa la línea...
    */
   game.lines[type][keyLine] = {
-    state: ELineState.ACTIVE,
+    state: ELineState.SELECTED,
     color,
     isCommit: false,
+    delay: 0,
   };
 
   /**
@@ -117,6 +174,7 @@ const changeGameState = ({ line, game, playerId }: ChangeGameState) => {
         counter: 0,
         isComplete: false,
         isCommit: false,
+        delay: 0,
       };
     }
 
@@ -131,7 +189,14 @@ const changeGameState = ({ line, game, playerId }: ChangeGameState) => {
     if (game.boxes[keyBox].counter === 4) {
       game.boxes[keyBox].color = color;
       game.boxes[keyBox].isComplete = true;
+      // TODO: debe validarse cuandos e hacen varias cajas...
+      completeBox = true;
     }
+  }
+
+  if (!completeBox) {
+    const nextTurnID = allPlayerIds[currentIndex === 0 ? 1 : 0];
+    game.turnID = nextTurnID;
   }
 
   /**
@@ -139,19 +204,19 @@ const changeGameState = ({ line, game, playerId }: ChangeGameState) => {
    */
 
   // TODO; Por el momento uno
-  const uiElement: IUIElement[] = [];
+  // const uiElement: IUIElement[] = [];
 
-  uiElement.push({
-    type,
-    row,
-    col,
-    color,
-    boxesComplete: indices.filter(
-      (box) => game.boxes[`${box.row}-${box.col}`].isComplete
-    ),
-  });
+  // uiElement.push({
+  //   type,
+  //   row,
+  //   col,
+  //   color,
+  //   boxesComplete: indices.filter(
+  //     (box) => game.boxes[`${box.row}-${box.col}`].isComplete
+  //   ),
+  // });
 
-  game.uiElement = uiElement;
+  // game.uiElement = uiElement;
 
   // type: TTypeLine;
   //   row: number;
@@ -173,12 +238,7 @@ Rune.initLogic({
   maxPlayers: 2,
   setup: (allPlayerIds) => getPlayerData(allPlayerIds),
   actions: {
-    onSelectLine: (line, { game, playerId }) => {
-      // allPlayerIds
-      // console.log("EN onSelectLine");
-      // console.log(line);
-      // console.log({ game, playerId, allPlayerIds });
-      changeGameState({ line, game, playerId });
-    },
+    onSelectLine: (line, { game, playerId, allPlayerIds }) =>
+      changeGameState({ line, game, playerId, allPlayerIds }),
   },
 });

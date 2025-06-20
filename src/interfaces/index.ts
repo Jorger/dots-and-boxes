@@ -1,10 +1,15 @@
 import { EBoardColor, ELineState, ETypeLine } from "../utils/constants";
-import { PlayerId, RuneClient } from "rune-sdk";
+import { PlayerId, RuneClient, Player as PlayerRune } from "rune-sdk";
+
+declare global {
+  const Rune: RuneClient<GameState, GameActions>;
+}
 
 export type TTypeLine = keyof typeof ETypeLine;
 export type TLineState = keyof typeof ELineState;
 export type TBoardColor = keyof typeof EBoardColor;
 export type IKeyValue = `${number}-${number}`;
+export type IBackgroud = TBoardColor | "INITIAL";
 
 export interface IBaseLine {
   row: number;
@@ -27,16 +32,15 @@ export interface ISelectLine {
 export interface IBoxLine {
   isComplete: boolean;
   color?: TBoardColor;
+  delay: number;
+  // Para saber si ya se renderizó en la ui
+  isCommit?: boolean;
 }
 
 export type TPositions = Record<TTypeLine, IBaseLine[]>;
 
-export interface IValueBoxes {
+export interface IValueBoxes extends IBoxLine {
   counter: number;
-  color?: TBoardColor;
-  isComplete: boolean;
-  // Para saber si ya se renderizó en la ui
-  isCommit: boolean;
 }
 
 export type TStateBoxes = Record<IKeyValue, IValueBoxes>;
@@ -44,6 +48,8 @@ export type TStateBoxes = Record<IKeyValue, IValueBoxes>;
 export interface IValueSelectedLines {
   state: TLineState;
   color: TBoardColor;
+  // Valor para la animación en css
+  delay: number;
   // Por defecto sería false, luego cuando se hace otro evento se pasa a true
   // y de esta manera se sabe que cuando se renderice se debe tomar este valor
   // y no el de uiElement
@@ -60,11 +66,6 @@ export interface Player {
   color: TBoardColor;
 }
 
-export interface IUIElement extends ISelectLine {
-  color: TBoardColor;
-  boxesComplete: IIndicesMatrix[];
-}
-
 export type GameActions = {
   onSelectLine: (line: ISelectLine) => void;
 };
@@ -75,14 +76,14 @@ export interface GameState {
   turnID: PlayerId;
   boxes: TStateBoxes;
   lines: TStateLines;
-  // devuelve lo que se renderizará en el UI
-  uiElement: IUIElement[];
+  isGameOver: boolean;
 }
 
 export interface ChangeGameState {
   line: ISelectLine;
   game: GameState;
   playerId: PlayerId;
+  allPlayerIds: PlayerId[];
 }
 
 export interface IRenderUILine extends ISelectLine {
@@ -98,36 +99,13 @@ export interface IRenderui {
   boxes: IRenderUIBox;
 }
 
-declare global {
-  const Rune: RuneClient<GameState, GameActions>;
+export interface PlayerScore extends PlayerRune {
+  score: number;
+  color: TBoardColor;
 }
 
-// const test: TStateLines = {
-//   HORIZONTAL: {
-//     "2-4": {
-//       state: "ACTIVE",
-//       color: "BLUE",
-//     },
-//   },
-//   VERTICAL: {
-//     "4-5": {
-//       state: "COMPLETED",
-//       color: "BLUE",
-//     },
-//   },
-// };
-
-// export type TSelectedLines
-
-// const row = 2;
-// const col = 3;
-
-// const test: TBoxes = {
-//   [`${row}-${col}`]: {
-//     counter: 0,
-//     color: "BLUE",
-//     isComplete: false,
-//   },
-// };
-
-// console.log(test);
+export interface IUInteractions {
+  disableUI: boolean;
+  counterDelay: number;
+  delayUI: number;
+}
