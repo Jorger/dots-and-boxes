@@ -1,11 +1,13 @@
 import "./styles.css";
 import {
   BOARD_SIZE,
+  COMBINED_DELAY,
   EBoardColor,
   ELineState,
   ETypeLine,
   LINE_SIZE,
   TILE_SIZE,
+  TIME_EXPAND_LINE,
 } from "../../../../utils/constants";
 import React from "react";
 import type {
@@ -22,6 +24,7 @@ interface LineProps {
   state: TLineState;
   baseLine: IBaseLine;
   lineColor?: TBoardColor;
+  lineDelay?: number;
   box?: IBoxLine;
   handleSelect: (data: ISelectLine) => void;
 }
@@ -31,11 +34,17 @@ const Line = ({
   state = ELineState.ACTIVE,
   baseLine,
   lineColor = EBoardColor.BLUE,
-  box = { isComplete: false },
+  lineDelay = 0,
+  box = { isComplete: false, delay: 0 },
   handleSelect,
 }: LineProps) => {
   const { left = 0, top = 0, row = 0, col = 0 } = baseLine;
-  const { isComplete, color = "" } = box;
+  const {
+    isComplete: isBoxComplete,
+    color: boxColor = "",
+    delay: boxDealy = 0,
+    isCommit: isBoxCommit,
+  } = box;
 
   const isVertical = type === ETypeLine.VERTICAL;
   const isLast = col === BOARD_SIZE - (isVertical ? 0 : 1);
@@ -45,8 +54,8 @@ const Line = ({
   /**
    * Para saber si se muestra la caja (box)
    */
-  const classNameFillingBox = isComplete
-    ? `filling-box ${color.toLowerCase()}`
+  const classNameFillingBox = isBoxComplete
+    ? `filling-box ${boxColor.toLowerCase()} ${!isBoxCommit ? "animate" : ""}`
     : "";
 
   /**
@@ -68,6 +77,8 @@ const Line = ({
     left,
     top,
     "--line-color": "",
+    "--line-delay": "",
+    "--box-delay": "",
   };
 
   /**
@@ -77,13 +88,29 @@ const Line = ({
   if (state === ELineState.SELECTED) {
     style["--line-color"] =
       `var(${lineColor === EBoardColor.BLUE ? "--line-blue" : "--line-red"})`;
+
+    /**
+     * Tiempo de espera para hacer la animación de la línea...
+     */
+    style["--line-delay"] = `${lineDelay * COMBINED_DELAY}ms`;
   }
 
+  if (isBoxComplete && !isBoxCommit) {
+    /**
+     * Tiempo de espera para hacer la animación de la caja
+     */
+    const animationBoxDelay = TIME_EXPAND_LINE + COMBINED_DELAY * boxDealy;
+    style["--box-delay"] = `${animationBoxDelay}ms`;
+  }
+
+  const title = `${type} Line, ${row} - ${col}`;
+
+  // {row}-{col}
   return (
     <button
       className={className}
       style={style}
-      title={`Line ${type}, ${row} - ${col}`}
+      title={title}
       disabled={!(state === ELineState.ACTIVE)}
       onClick={() =>
         handleSelect({
@@ -92,9 +119,7 @@ const Line = ({
           col,
         })
       }
-    >
-      {row}-{col}
-    </button>
+    />
   );
 };
 

@@ -1,7 +1,7 @@
-/* :root {
-  --color-red: #f7a27e;
-  --color-blue: #6cb8d5;
-} */
+:root {
+  --turn-red: #e68c68;
+  --turn-blue: #5da2ca;
+}
 
 * {
   padding: 0;

@@ -1,3 +1,4 @@
+import type { IBaseLine, TPositions } from "../interfaces";
 import {
   BASE_X,
   BOARD_SIZE,
@@ -6,7 +7,6 @@ import {
   OFFSET,
   TILE_SIZE,
 } from "./constants";
-import type { IBaseLine, TPositions } from "../interfaces";
 
 const calculateVerticalLines = (): IBaseLine[] =>
   new Array(BOARD_SIZE)

@@ -1,3 +1,5 @@
+import { IUInteractions } from "../interfaces";
+
 export const BASE_WIDTH = 412;
 export const BASE_HEIGHT = 732;
 export const BOARD_SIZE = 5;
@@ -6,8 +8,9 @@ export const BASE_X = 30;
 export const LINE_SIZE = 10;
 export const OFFSET = 1;
 // En milisegundos
-export const TIME_SCALE_UP = 200;
-export const TIME_EXPAND_LINE = 500;
+export const TIME_SCALE_UP = 180;
+export const TIME_EXPAND_LINE = 200;
+export const COMBINED_DELAY = TIME_SCALE_UP + TIME_EXPAND_LINE;
 
 export enum ETypeLine {
   HORIZONTAL = "HORIZONTAL",
@@ -30,6 +33,12 @@ export enum EBoardColorWithInitial {
   BLUE = EBoardColor.BLUE,
   RED = EBoardColor.RED,
 }
+
+export const INITIAL_UI_INTERACTIONS: IUInteractions = {
+  disableUI: false,
+  counterDelay: 0,
+  delayUI: 0,
+};
 
 document.documentElement.style.setProperty("--base-height", `${BASE_HEIGHT}px`);
 document.documentElement.style.setProperty("--base-width", `${BASE_WIDTH}px`);

@@ -1,0 +1,73 @@
+.game-score {
+  align-items: center;
+  display: flex;
+  justify-content: center;
+  position: absolute;
+  top: 5px;
+  width: 100%;
+}
+
+.game-score-container {
+  background-color: white;
+  border-radius: 20px;
+  box-shadow: rgba(0, 0, 0, 0.24) 0px 3px 8px;
+  color: black;
+  overflow: hidden;
+  padding: 4px;
+  width: 170px;
+}
+
+.game-score-progress {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background-color: #dbe9f4;
+  border-radius: 15px;
+  padding: 2px 5px;
+
+  /* TODO: tal vez hacerlo com se hizo con la linea para el progreso */
+  /* background-image: linear-gradient(red, red);
+  background-repeat: no-repeat; */
+  /* en este caso el 40% es el que debe variar */
+  /* background-size: 40% 100%; */
+  /* De izquierda a derecha */
+  /* background-position: 0 0; */
+  /* De derecha a izquierda */
+  /* background-position: 100% 0; */
+}
+
+.game-score-profile {
+  align-items: center;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.game-score-profile img {
+  width: 30px;
+  height: 30px;
+  /* TODO: el color debe ser dinamico cuando tiene el turno */
+  border: 3px solid white;
+  border-radius: 50%;
+}
+
+.game-score-value {
+  font-size: 18px;
+  font-weight: bold;
+}
+
+/* TODO: establecer el color correcto */
+.game-score-value.red {
+  color: #ee6f63;
+}
+
+.game-score-value.blue {
+  color: #11a6e5;
+}
+
+.game-score-dot {
+  background-color: #4d5459;
+  border-radius: 50%;
+  height: 6px;
+  width: 6px;
+}
