@@ -64,6 +64,7 @@ export type TStateLines = Record<TTypeLine, TSelectedLines>;
 export interface Player {
   playerID: PlayerId;
   color: TBoardColor;
+  score: number;
 }
 
 export type GameActions = {
@@ -77,6 +78,7 @@ export interface GameState {
   boxes: TStateBoxes;
   lines: TStateLines;
   isGameOver: boolean;
+  numBoxesCompleted: number;
 }
 
 export interface ChangeGameState {
@@ -106,6 +108,6 @@ export interface PlayerScore extends PlayerRune {
 
 export interface IUInteractions {
   disableUI: boolean;
-  counterDelay: number;
+  runEffect: boolean;
   delayUI: number;
 }

@@ -105,7 +105,6 @@ const Line = ({
 
   const title = `${type} Line, ${row} - ${col}`;
 
-  // {row}-{col}
   return (
     <button
       className={className}

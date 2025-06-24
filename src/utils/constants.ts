@@ -8,8 +8,8 @@ export const BASE_X = 30;
 export const LINE_SIZE = 10;
 export const OFFSET = 1;
 // En milisegundos
-export const TIME_SCALE_UP = 180;
-export const TIME_EXPAND_LINE = 200;
+export const TIME_SCALE_UP = 100;
+export const TIME_EXPAND_LINE = 150;
 export const COMBINED_DELAY = TIME_SCALE_UP + TIME_EXPAND_LINE;
 
 export enum ETypeLine {
@@ -36,7 +36,7 @@ export enum EBoardColorWithInitial {
 
 export const INITIAL_UI_INTERACTIONS: IUInteractions = {
   disableUI: false,
-  counterDelay: 0,
+  runEffect: false,
   delayUI: 0,
 };
 

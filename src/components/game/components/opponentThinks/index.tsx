@@ -6,6 +6,7 @@ interface OpponentThinksProps {
   currentColor: TBoardColor;
 }
 
+// TODO: tal vez pasar el nombre del oponente
 const OpponentThinks = ({
   currentColor = EBoardColor.BLUE,
 }: OpponentThinksProps) => (

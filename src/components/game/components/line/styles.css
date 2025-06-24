@@ -94,10 +94,12 @@
 
 .game-line.vertical.filling-box.blue::before {
   background-color: var(--box-blue);
+  border: 1px solid var(--box-blue);
 }
 
 .game-line.vertical.filling-box.red::before {
   background-color: var(--box-red);
+  border: 1px solid var(--box-red);
 }
 
 /* Para evitar que se renderice un box al final, puede que nunca pase */
