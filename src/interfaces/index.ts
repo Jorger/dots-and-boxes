@@ -107,6 +107,8 @@ export interface PlayerScore extends PlayerRune {
 }
 
 export interface IUInteractions {
+  showCounter: boolean;
+  isGameOver: boolean;
   disableUI: boolean;
   runEffect: boolean;
   delayUI: number;
