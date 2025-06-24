@@ -1,26 +1,27 @@
+import { randomNumber } from "./utils/randomNumber";
 import {
   BOARD_SIZE,
   EBoardColor,
   ELineState,
   ETypeLine,
 } from "./utils/constants";
+import {
+  calculateIndicesMatrix,
+  calculateLinesMatrix,
+} from "./utils/calculateIndicesMatrix";
 import type {
   ChangeGameState,
   GameState,
+  IIndicesMatrix,
   IKeyValue,
   Player,
+  TBoardColor,
   TTypeLine,
 } from "./interfaces";
-import { calculateIndicesMatrix } from "./utils/calculateIndicesMatrix";
 
-/**
- * Genera un valor aleatorio dado un rango
- * @param min
- * @param max
- * @returns
- */
-const randomNumber = (min: number, max: number) =>
-  Math.floor(Math.random() * (max - min + 1)) + min;
+// TODO: eliminar una vez hecho las validaciones del caso
+// import { TEST_DATA } from "./base_data";
+// ETypeLine
 
 /**
  * Validar si el valor de la línea está dentro del rango de las líneas
@@ -44,10 +45,12 @@ const getPlayerData = (allPlayerIds: string[]): GameState => {
     {
       playerID: allPlayerIds[0],
       color: colorPlayer1,
+      score: 0,
     },
     {
       playerID: allPlayerIds[1],
       color: colorPlayer2,
+      score: 0,
     }
   );
 
@@ -60,11 +63,133 @@ const getPlayerData = (allPlayerIds: string[]): GameState => {
     turnID,
     boxes: {},
     isGameOver: false,
+    numBoxesCompleted: 0,
     lines: {
       [ETypeLine.HORIZONTAL]: {},
       [ETypeLine.VERTICAL]: {},
     },
   };
+
+  // return {
+  //   playerIds: allPlayerIds,
+  //   players,
+  //   turnID,
+  //   boxes: TEST_DATA.boxes,
+  //   isGameOver: false,
+  //   numBoxesCompleted: 0,
+  //   lines: TEST_DATA.lines,
+  // };
+};
+
+interface ValidateCompleteLines {
+  indices: IIndicesMatrix[];
+  delay: number;
+  color: TBoardColor;
+  game: GameState;
+}
+
+const validateCompleteLines = ({
+  indices,
+  delay,
+  color,
+  game,
+}: ValidateCompleteLines) => {
+  // debugger;
+  // console.log("VALOR DE DELAY:", delay);
+  // const copyGame = JSON.parse(JSON.stringify(game));
+  // console.log(copyGame);
+  // Ahora se debe validar las líneas para saber si hay múltiples cajas
+  // que se completan
+  for (const { row: boxRow, col: boxCol } of indices) {
+    const keyBox: IKeyValue = `${boxRow}-${boxCol}`;
+
+    // La caja no está completa
+    if (!game.boxes?.[keyBox]?.isComplete) {
+      /**
+       * Traer lás lineas que componen la caja y además dejar sólo
+       * las líneas que no están ocupadas...
+       */
+      const boxLines = calculateLinesMatrix(boxRow, boxCol).filter(
+        ({ row, col, type }) => {
+          const keyLine: IKeyValue = `${row}-${col}`;
+          return !game.lines[type][keyLine];
+        }
+      );
+
+      // Se iteran las líneas y se valida si se puede hacer la caja...
+      for (const line of boxLines) {
+        /**
+         * Se obtienen las cajas que pertecen a la línea...
+         */
+        const newIndices = calculateIndicesMatrix(
+          line.row,
+          line.col,
+          line.type
+        );
+
+        let lineCompleteBox = false;
+        const keyLine: IKeyValue = `${line.row}-${line.col}`;
+
+        /**
+         * Se iteran cada una de las cajas y se valida si con la línea se completaría
+         * una caja
+         */
+        for (const { row: newBoxRow, col: newBoxCol } of newIndices) {
+          const keyBox: IKeyValue = `${newBoxRow}-${newBoxCol}`;
+          lineCompleteBox = game.boxes?.[keyBox]?.counter === 3;
+          /**
+           * Quiere decir que con esa línea se completaría una caja, por lo que no
+           * es necesario seguir iterando...
+           */
+          if (lineCompleteBox) {
+            break;
+          }
+        }
+
+        /**
+         * Ahora como se sabe que con la línea se completa una caja, se marca la línea...
+         */
+        if (lineCompleteBox) {
+          /**
+           * Se marca la línea..
+           */
+          game.lines[line.type][keyLine] = {
+            state: ELineState.SELECTED,
+            color,
+            isCommit: false,
+            delay,
+          };
+
+          /**
+           * Se iteran cada una de las cajas...
+           */
+          for (const { row: newBoxRow, col: newBoxCol } of newIndices) {
+            const keyBox: IKeyValue = `${newBoxRow}-${newBoxCol}`;
+            /**
+             * Se incrementa el valor de líneas seleccionadas
+             */
+            game.boxes[keyBox].counter++;
+
+            /**
+             * Se valida la caja completada, al menos debe haber una...
+             */
+            if (game.boxes[keyBox].counter === 4) {
+              game.boxes[keyBox].color = color;
+              game.boxes[keyBox].isComplete = true;
+              game.boxes[keyBox].delay = delay;
+            }
+          }
+
+          validateCompleteLines({
+            indices: newIndices,
+            delay: delay + 1,
+            color,
+            game,
+          });
+        }
+      }
+    }
+  }
 };
 
 const changeGameState = ({
@@ -160,6 +285,8 @@ const changeGameState = ({
    */
   const indices = calculateIndicesMatrix(row, col, type);
 
+  // console.log(indices);
+
   /**
    * Se iteran las cajas que estén relacionadas a la línea seleccionada...
    */
@@ -189,48 +316,54 @@ const changeGameState = ({
     if (game.boxes[keyBox].counter === 4) {
       game.boxes[keyBox].color = color;
       game.boxes[keyBox].isComplete = true;
-      // TODO: debe validarse cuandos e hacen varias cajas...
       completeBox = true;
     }
   }
+
+  if (completeBox) {
+    validateCompleteLines({
+      indices,
+      color,
+      game,
+      delay: 1,
+    });
+
+    /**
+     * Calcular el score...
+     */
+    for (let i = 0; i < game.players.length; i++) {
+      const playerColor = game.players[i].color;
+      /**
+       * Traer el número de cajas completadas por jugador
+       */
+      // TODO: tal vez moverlo a una función...
+      const score = Object.keys(game.boxes).filter(
+        (key) =>
+          game.boxes[key as IKeyValue].isComplete &&
+          game.boxes[key as IKeyValue].color === playerColor
+      ).length;
+
+      /**
+       * Se actualiza el nímero de cajas completas por jugador...
+       */
+      game.players[i].score = score;
+    }
+  }
+
+  // TODO: validar el game over...
+  /**
+   * Valida si se han hecho múltiples cuadrados...
+   */
+  game.numBoxesCompleted = Object.keys(game.boxes).filter(
+    (key) =>
+      game.boxes[key as IKeyValue].isComplete &&
+      !game.boxes[key as IKeyValue].isCommit
+  ).length;
 
   if (!completeBox) {
     const nextTurnID = allPlayerIds[currentIndex === 0 ? 1 : 0];
     game.turnID = nextTurnID;
   }
-
-  /**
-   * Generar la data que se enviará para el UI
-   */
-
-  // TODO; Por el momento uno
-  // const uiElement: IUIElement[] = [];
-
-  // uiElement.push({
-  //   type,
-  //   row,
-  //   col,
-  //   color,
-  //   boxesComplete: indices.filter(
-  //     (box) => game.boxes[`${box.row}-${box.col}`].isComplete
-  //   ),
-  // });
-
-  // game.uiElement = uiElement;
-
-  // type: TTypeLine;
-  //   row: number;
-  //   col: number;
-
-  // export interface IUIElement extends ISelectLine {
-  //   color: TBoardColor;
-  //   indices?: IIndicesMatrix[];
-  // }
-
-  // console.log("changeGameState");
-  console.log("indices: ", indices);
-  // console.log(JSON.parse(JSON.stringify(game)));
-  // console.log({ type, row, col, playerId });
 };
 
 Rune.initLogic({

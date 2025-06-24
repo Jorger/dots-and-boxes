@@ -39,6 +39,7 @@ export const calculateExtraProps = ({
   let lineColor: TBoardColor = EBoardColor.BLUE;
   let box: IBoxLine | undefined = undefined;
   const keyLine: IKeyValue = `${row}-${col}`;
+  let lineDelay = 0;
 
   /**
    * Si existe una línea se obtiene el estado y el color de la misma...
@@ -46,6 +47,7 @@ export const calculateExtraProps = ({
   if (lines[typeLine][keyLine]) {
     state = lines[typeLine][keyLine].state;
     lineColor = lines[typeLine][keyLine].color;
+    lineDelay = lines[typeLine][keyLine].delay;
   }
 
   /**
@@ -59,5 +61,5 @@ export const calculateExtraProps = ({
     box = boxes[keyLine];
   }
 
-  return { state, lineColor, box };
+  return { state, lineColor, box, lineDelay };
 };
