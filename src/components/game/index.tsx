@@ -1,12 +1,15 @@
+import { COMBINED_DELAY, INITIAL_UI_INTERACTIONS } from "../../utils/constants";
 import { getCurrentColor } from "./helpers";
 import { PlayerId } from "rune-sdk";
 import { useCallback, useEffect, useState } from "react";
+import { useWait } from "../../hooks";
 import {
   GameWrapper,
   Grid,
   OpponentThinks,
   Score,
   ShowTurn,
+  StartCounter,
 } from "./components";
 import type {
   GameState,
@@ -15,12 +18,6 @@ import type {
   IUInteractions,
   TBoardColor,
 } from "../../interfaces";
-import { useWait } from "../../hooks";
-import { COMBINED_DELAY, INITIAL_UI_INTERACTIONS } from "../../utils/constants";
-
-// IUInteractions
-// import { INITIAL_UI_INTERACTIONS } from "../../utils/constants";
-// import { EBoardColor } from "../../utils/constants";
 
 const Game = () => {
   /**
@@ -61,42 +58,50 @@ const Game = () => {
    */
   useEffect(() => {
     Rune.initClient({
-      onChange: ({ game, action, yourPlayerId }) => {
+      onChange: ({ game, action, yourPlayerId, event }) => {
         /**
          * Determina si se ha reiniciando el juego
          */
-        // event
-        // const isNewGame = (event?.name || "") === "stateSync";
+        const isNewGame = (event?.name || "") === "stateSync";
 
+        /**
+         * Se guarda el estado del juego que proviene del servicio...
+         */
         setGame(game);
 
+        /**
+         * Indica que es evento inicial cuando inicia el juego
+         */
         if (!action) {
           setYourPlayerId(yourPlayerId);
         }
 
-        if (action?.name === "onSelectLine") {
-          // console.log("SE HA SELECCIONADO DEL USUARIO", game.numBoxesCompleted);
+        /**
+         * Reiniciar los estados del juego...
+         */
+        if (isNewGame) {
+          setUiInteractions(INITIAL_UI_INTERACTIONS);
+        }
 
+        if (action?.name === "onSelectLine") {
           if (game.numBoxesCompleted >= 1) {
             // Se establece el usewait
             const delayUI = COMBINED_DELAY * game.numBoxesCompleted;
-            // console.log({ yourPlayerId, delayUI });
             setUiInteractions({
+              showCounter: false,
               runEffect: true,
               delayUI,
               disableUI: true,
+              isGameOver: game.isGameOver,
             });
           } else {
-            // console.log("INGRESA ACÁ POR QUE NO HIZO CAJA");
-            setUiInteractions({ ...INITIAL_UI_INTERACTIONS, disableUI: false });
+            setUiInteractions({
+              ...INITIAL_UI_INTERACTIONS,
+              disableUI: false,
+              showCounter: false,
+            });
           }
         }
-
-        console.log("game");
-        console.log(game);
-        // console.log({ isNewGame });
-
-        // if (action && action.name === "claimCell") selectSound.play()
       },
     });
   }, []);
@@ -106,7 +111,17 @@ const Game = () => {
     uiInteractions.delayUI,
     // Se usa el useCallback para evitar que la función se genere cada vez que renderiza el componente...
     useCallback(
-      () => setUiInteractions({ ...INITIAL_UI_INTERACTIONS, disableUI: false }),
+      () =>
+        setUiInteractions((current) => {
+          /**
+           * Se muestra el modal de game over
+           */
+          if (current.isGameOver) {
+            Rune.showGameOverPopUp();
+          }
+
+          return { ...current, disableUI: false };
+        }),
       []
     )
   );
@@ -116,20 +131,35 @@ const Game = () => {
     return;
   }
 
-  // console.log(yourPlayerId);
-
+  /**
+   * Función que se ejecuta cuando un usuario ha seleccionado una línea,
+   * siempre y cuand tenga el turno...
+   * @param line 
+   */
   const handleSelect = (line: ISelectLine) => {
     if (hasTurn && !isGameOver) {
-      setUiInteractions({ ...INITIAL_UI_INTERACTIONS, disableUI: true });
+      setUiInteractions({ ...uiInteractions, disableUI: true });
       Rune.actions.onSelectLine(line);
     }
   };
 
-  // TODO: validar el color "INITIAL", cuando este el counter
-  const currentColor: IBackgroud = getCurrentColor({
-    players: game.players,
-    turnID: game.turnID,
-  });
+  /**
+   * Función que se ejecuta, una vez se ha terminado el conteo inicial del juego
+   */
+  const handleEndStartCounter = () => {
+    setUiInteractions({ ...uiInteractions, showCounter: false });
+  };
+
+  const { showCounter } = uiInteractions;
+
+  // Si se muestra el contador, el color que queda en este caso
+  // es el color inicial de fondo
+  const currentColor: IBackgroud = showCounter
+    ? "INITIAL"
+    : getCurrentColor({
+        players: game.players,
+        turnID: game.turnID,
+      });
 
   /**
    * Desabilita el ui si el estado indica que es así, o si el el usuario no tiene
@@ -137,16 +167,19 @@ const Game = () => {
    */
   const disableUI = uiInteractions.disableUI || !hasTurn || isGameOver;
 
-  // console.log({ yourPlayerId, disableUI });
-
   return (
     <GameWrapper currentColor={currentColor} disableUI={disableUI}>
+      {showCounter && (
+        <StartCounter handleEndStartCounter={handleEndStartCounter} />
+      )}
       <Score players={game.players} yourPlayerId={yourPlayerId || ""} />
-      {!hasTurn && (
+      {!showCounter && !hasTurn && (
         <OpponentThinks currentColor={currentColor as TBoardColor} />
       )}
       <Grid handleSelect={handleSelect} boxes={game.boxes} lines={game.lines} />
-      {hasTurn && <ShowTurn currentColor={currentColor as TBoardColor} />}
+      {!showCounter && hasTurn && (
+        <ShowTurn currentColor={currentColor as TBoardColor} />
+      )}
     </GameWrapper>
   );
 };

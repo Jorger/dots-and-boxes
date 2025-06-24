@@ -13,13 +13,13 @@ export const getPlayersScore = ({
   /**
    * Se extrae la información del player que contiene el nombre y el avatar
    */
-  const playersScore: PlayerScore[] = players.map(({ playerID, color }) => {
+  const playersScore: PlayerScore[] = players.map(({ playerID, color, score }) => {
     const playerInfo = Rune.getPlayerInfo(playerID);
 
     return {
       ...playerInfo,
       displayName: playerID === yourPlayerId ? "You" : playerInfo.displayName,
-      score: 0,
+      score,
       color,
     };
   });

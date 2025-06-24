@@ -4,6 +4,7 @@ import {
   EBoardColor,
   ELineState,
   ETypeLine,
+  TOTAL_BOXES,
 } from "./utils/constants";
 import {
   calculateIndicesMatrix,
@@ -94,10 +95,6 @@ const validateCompleteLines = ({
   color,
   game,
 }: ValidateCompleteLines) => {
-  // debugger;
-  // console.log("VALOR DE DELAY:", delay);
-  // const copyGame = JSON.parse(JSON.stringify(game));
-  // console.log(copyGame);
   // Ahora se debe validar las líneas para saber si hay múltiples cajas
   // que se completan
   for (const { row: boxRow, col: boxCol } of indices) {
@@ -127,24 +124,17 @@ const validateCompleteLines = ({
           line.type
         );
 
-        let lineCompleteBox = false;
         const keyLine: IKeyValue = `${line.row}-${line.col}`;
 
         /**
          * Se iteran cada una de las cajas y se valida si con la línea se completaría
          * una caja
          */
-        for (const { row: newBoxRow, col: newBoxCol } of newIndices) {
-          const keyBox: IKeyValue = `${newBoxRow}-${newBoxCol}`;
-          lineCompleteBox = game.boxes?.[keyBox]?.counter === 3;
-          /**
-           * Quiere decir que con esa línea se completaría una caja, por lo que no
-           * es necesario seguir iterando...
-           */
-          if (lineCompleteBox) {
-            break;
-          }
-        }
+        const lineCompleteBox =
+          newIndices.filter(({ row: newBoxRow, col: newBoxCol }) => {
+            const keyBox: IKeyValue = `${newBoxRow}-${newBoxCol}`;
+            return game.boxes?.[keyBox]?.counter === 3;
+          }).length !== 0;
 
         /**
          * Ahora como se sabe que con la línea se completa una caja, se marca la línea...
@@ -165,6 +155,15 @@ const validateCompleteLines = ({
            */
           for (const { row: newBoxRow, col: newBoxCol } of newIndices) {
             const keyBox: IKeyValue = `${newBoxRow}-${newBoxCol}`;
+
+            if (!game.boxes[keyBox]) {
+              game.boxes[keyBox] = {
+                counter: 0,
+                isComplete: false,
+                isCommit: false,
+                delay,
+              };
+            }
             /**
              * Se incrementa el valor de líneas seleccionadas
              */
@@ -348,9 +347,11 @@ const changeGameState = ({
        */
       game.players[i].score = score;
     }
+  } else {
+    const nextTurnID = allPlayerIds[currentIndex === 0 ? 1 : 0];
+    game.turnID = nextTurnID;
   }
 
-  // TODO: validar el game over...
   /**
    * Valida si se han hecho múltiples cuadrados...
    */
@@ -360,9 +361,35 @@ const changeGameState = ({
       !game.boxes[key as IKeyValue].isCommit
   ).length;
 
-  if (!completeBox) {
-    const nextTurnID = allPlayerIds[currentIndex === 0 ? 1 : 0];
-    game.turnID = nextTurnID;
+  /**
+   * Guarda el total de las cajas que se han completado, útil para saber
+   * si es game over...
+   */
+  const totalBoxesCompleted = game.players[0].score + game.players[1].score;
+
+  // Si el número de cajas que han completado es igual al total de cajas,
+  // entonces se indica que es game over...
+  game.isGameOver = totalBoxesCompleted === TOTAL_BOXES;
+
+  if (game.isGameOver) {
+    /**
+     * Determina el ganador y el perdedor
+     */
+    const indexWinner = game.players[0].score > game.players[1].score ? 0 : 1;
+    const winner = game.playerIds[indexWinner];
+    const loser = game.playerIds[indexWinner === 0 ? 1 : 0];
+
+    /**
+     * Se establece delayPopUp para así poder controlar la visualización
+     * del modal de game over
+     */
+    Rune.gameOver({
+      players: {
+        [winner]: "WON",
+        [loser]: "LOST",
+      },
+      delayPopUp: true,
+    });
   }
 };
 
