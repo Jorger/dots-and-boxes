@@ -1,5 +1,5 @@
 import { COMBINED_DELAY, INITIAL_UI_INTERACTIONS } from "../../utils/constants";
-import { getCurrentColor } from "./helpers";
+import { generateRandomLine, getCurrentColor } from "./helpers";
 import { PlayerId } from "rune-sdk";
 import { useCallback, useEffect, useState } from "react";
 import { useWait } from "../../hooks";
@@ -84,23 +84,16 @@ const Game = () => {
         }
 
         if (action?.name === "onSelectLine") {
-          if (game.numBoxesCompleted >= 1) {
-            // Se establece el usewait
-            const delayUI = COMBINED_DELAY * game.numBoxesCompleted;
-            setUiInteractions({
-              showCounter: false,
-              runEffect: true,
-              delayUI,
-              disableUI: true,
-              isGameOver: game.isGameOver,
-            });
-          } else {
-            setUiInteractions({
-              ...INITIAL_UI_INTERACTIONS,
-              disableUI: false,
-              showCounter: false,
-            });
-          }
+          // Se establece el usewait
+          const delayUI = COMBINED_DELAY * game.numBoxesCompleted;
+          setUiInteractions({
+            showCounter: false,
+            runEffect: true,
+            delayUI,
+            disableUI: true,
+            startTimer: false,
+            isGameOver: game.isGameOver,
+          });
         }
       },
     });
@@ -120,7 +113,12 @@ const Game = () => {
             Rune.showGameOverPopUp();
           }
 
-          return { ...current, disableUI: false };
+          return {
+            ...current,
+            disableUI: false,
+            startTimer: true,
+            runEffect: false,
+          };
         }),
       []
     )
@@ -134,11 +132,15 @@ const Game = () => {
   /**
    * Función que se ejecuta cuando un usuario ha seleccionado una línea,
    * siempre y cuand tenga el turno...
-   * @param line 
+   * @param line
    */
   const handleSelect = (line: ISelectLine) => {
     if (hasTurn && !isGameOver) {
-      setUiInteractions({ ...uiInteractions, disableUI: true });
+      setUiInteractions({
+        ...uiInteractions,
+        disableUI: true,
+        startTimer: false,
+      });
       Rune.actions.onSelectLine(line);
     }
   };
@@ -147,10 +149,24 @@ const Game = () => {
    * Función que se ejecuta, una vez se ha terminado el conteo inicial del juego
    */
   const handleEndStartCounter = () => {
-    setUiInteractions({ ...uiInteractions, showCounter: false });
+    setUiInteractions({
+      ...uiInteractions,
+      showCounter: false,
+      startTimer: true,
+    });
   };
 
-  const { showCounter } = uiInteractions;
+  const handleInterval = () => {
+    if (hasTurn && !isGameOver) {
+      const randomLine = generateRandomLine(game.lines);
+
+      if (randomLine) {
+        handleSelect(randomLine);
+      }
+    }
+  };
+
+  const { showCounter, startTimer } = uiInteractions;
 
   // Si se muestra el contador, el color que queda en este caso
   // es el color inicial de fondo
@@ -172,7 +188,15 @@ const Game = () => {
       {showCounter && (
         <StartCounter handleEndStartCounter={handleEndStartCounter} />
       )}
-      <Score players={game.players} yourPlayerId={yourPlayerId || ""} />
+      <Score
+        players={game.players}
+        yourPlayerId={yourPlayerId || ""}
+        turnID={turnID}
+        hasTurn={hasTurn}
+        startTimer={startTimer && !isGameOver}
+        currentColor={currentColor}
+        handleInterval={handleInterval}
+      />
       {!showCounter && !hasTurn && (
         <OpponentThinks currentColor={currentColor as TBoardColor} />
       )}

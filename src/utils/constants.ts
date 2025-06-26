@@ -13,6 +13,7 @@ export const TIME_SCALE_UP = 100;
 export const TIME_EXPAND_LINE = 150;
 export const COMBINED_DELAY = TIME_SCALE_UP + TIME_EXPAND_LINE;
 export const TIME_COUNTDOWN = 500;
+export const TIME_INTERVAL_CHRONOMETER = 100;
 
 export enum ETypeLine {
   HORIZONTAL = "HORIZONTAL",
@@ -41,6 +42,7 @@ export const INITIAL_UI_INTERACTIONS: IUInteractions = {
   isGameOver: false,
   disableUI: false,
   runEffect: false,
+  startTimer: false,
   delayUI: 0,
 };
 

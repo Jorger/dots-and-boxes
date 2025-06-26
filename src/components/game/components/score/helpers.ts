@@ -6,6 +6,11 @@ interface GetPlayersScore {
   yourPlayerId: PlayerId;
 }
 
+/**
+ * Para establecer la posición de los players en el score...
+ * @param param0
+ * @returns
+ */
 export const getPlayersScore = ({
   players = [],
   yourPlayerId,
@@ -13,16 +18,18 @@ export const getPlayersScore = ({
   /**
    * Se extrae la información del player que contiene el nombre y el avatar
    */
-  const playersScore: PlayerScore[] = players.map(({ playerID, color, score }) => {
-    const playerInfo = Rune.getPlayerInfo(playerID);
+  const playersScore: PlayerScore[] = players.map(
+    ({ playerID, color, score }) => {
+      const playerInfo = Rune.getPlayerInfo(playerID);
 
-    return {
-      ...playerInfo,
-      displayName: playerID === yourPlayerId ? "You" : playerInfo.displayName,
-      score,
-      color,
-    };
-  });
+      return {
+        ...playerInfo,
+        displayName: playerID === yourPlayerId ? "You" : playerInfo.displayName,
+        score,
+        color,
+      };
+    }
+  );
 
   /**
    * Se establece el orden en el cual se renderizará
