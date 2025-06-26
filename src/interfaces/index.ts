@@ -111,5 +111,6 @@ export interface IUInteractions {
   isGameOver: boolean;
   disableUI: boolean;
   runEffect: boolean;
+  startTimer: boolean;
   delayUI: number;
 }

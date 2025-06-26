@@ -1,4 +1,5 @@
 .game-score {
+  --progess-color: transparent;
   align-items: center;
   display: flex;
   justify-content: center;
@@ -18,22 +19,33 @@
 }
 
 .game-score-progress {
+  background-color: #dbe9f4;
+  background-image: linear-gradient(var(--progess-color), var(--progess-color));
+  background-position: var(--timer-position);
+  background-repeat: no-repeat;
+  background-size: var(--timer-progress);
+  border-radius: 15px;
+  padding: 4px 5px;
+}
+
+.game-score-progress.red {
+  --progess-color: #ff6c5f;
+}
+
+.game-score-progress.blue {
+  --progess-color: #03c9f1;
+}
+
+.game-score-progress-item {
+  display: flex;
+  justify-content: center;
+  width: 100%;
   display: flex;
   justify-content: space-between;
   align-items: center;
-  background-color: #dbe9f4;
-  border-radius: 15px;
-  padding: 2px 5px;
-
-  /* TODO: tal vez hacerlo com se hizo con la linea para el progreso */
-  /* background-image: linear-gradient(red, red);
-  background-repeat: no-repeat; */
-  /* en este caso el 40% es el que debe variar */
-  /* background-size: 40% 100%; */
-  /* De izquierda a derecha */
-  /* background-position: 0 0; */
-  /* De derecha a izquierda */
-  /* background-position: 100% 0; */
+  border-radius: 20px;
+  background-color: rgba(255, 255, 255, 0.802);
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px;
 }
 
 .game-score-profile {
@@ -44,25 +56,35 @@
 }
 
 .game-score-profile img {
-  width: 30px;
-  height: 30px;
-  /* TODO: el color debe ser dinamico cuando tiene el turno */
-  border: 3px solid white;
+  transition: all 0.5s linear;
+  background-color: white;
   border-radius: 50%;
+  border: 3px solid white;
+  height: 30px;
+  width: 30px;
+}
+
+.game-score-profile.red img {
+  border: 3px solid #b65048;
+  background-color: #b65048;
+}
+
+.game-score-profile.blue img {
+  border: 3px solid #3183a5;
+  background-color: #3183a5;
 }
 
 .game-score-value {
-  font-size: 18px;
+  font-size: 20px;
   font-weight: bold;
 }
 
-/* TODO: establecer el color correcto */
 .game-score-value.red {
-  color: #ee6f63;
+  color: #e77369;
 }
 
 .game-score-value.blue {
-  color: #11a6e5;
+  color: #1aa5e2;
 }
 
 .game-score-dot {

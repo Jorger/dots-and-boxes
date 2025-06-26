@@ -335,7 +335,6 @@ const changeGameState = ({
       /**
        * Traer el número de cajas completadas por jugador
        */
-      // TODO: tal vez moverlo a una función...
       const score = Object.keys(game.boxes).filter(
         (key) =>
           game.boxes[key as IKeyValue].isComplete &&
