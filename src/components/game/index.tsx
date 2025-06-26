@@ -53,6 +53,11 @@ const Game = () => {
   const isGameOver = game?.isGameOver || false;
 
   /**
+   * Se extraen los valores que se pueden usar para las interacciones del UI
+   */
+  const { showCounter, startTimer, runEffect, delayUI } = uiInteractions;
+
+  /**
    * Efecto que escucha cuando hay cambios en el estado del juego,
    * eventos que vienen del server.
    */
@@ -100,8 +105,8 @@ const Game = () => {
   }, []);
 
   useWait(
-    uiInteractions.runEffect,
-    uiInteractions.delayUI,
+    runEffect,
+    delayUI,
     // Se usa el useCallback para evitar que la función se genere cada vez que renderiza el componente...
     useCallback(
       () =>
@@ -165,8 +170,6 @@ const Game = () => {
       }
     }
   };
-
-  const { showCounter, startTimer } = uiInteractions;
 
   // Si se muestra el contador, el color que queda en este caso
   // es el color inicial de fondo
