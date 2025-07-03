@@ -1,4 +1,4 @@
-import { EBoardColor, ELineState, ETypeLine } from "../utils/constants";
+import { EBoardColor, ELineState, ESounds, ETypeLine } from "../utils/constants";
 import { PlayerId, RuneClient, Player as PlayerRune } from "rune-sdk";
 
 declare global {
@@ -10,6 +10,7 @@ export type TLineState = keyof typeof ELineState;
 export type TBoardColor = keyof typeof EBoardColor;
 export type IKeyValue = `${number}-${number}`;
 export type IBackgroud = TBoardColor | "INITIAL";
+export type TESounds = keyof typeof ESounds;
 
 export interface IBaseLine {
   row: number;
@@ -114,3 +115,5 @@ export interface IUInteractions {
   startTimer: boolean;
   delayUI: number;
 }
+
+export type Sounds = Record<TESounds, Howl>;

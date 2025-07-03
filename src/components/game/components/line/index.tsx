@@ -1,15 +1,18 @@
 import "./styles.css";
+import { playSound } from "../../../../sounds";
+import { useLineAndBoxSoundEffect } from "../../../../hooks";
 import {
   BOARD_SIZE,
   COMBINED_DELAY,
   EBoardColor,
   ELineState,
+  ESounds,
   ETypeLine,
   LINE_SIZE,
   TILE_SIZE,
   TIME_EXPAND_LINE,
 } from "../../../../utils/constants";
-import React from "react";
+import React, { useCallback } from "react";
 import type {
   IBaseLine,
   IBoxLine,
@@ -43,13 +46,34 @@ const Line = ({
     isComplete: isBoxComplete,
     color: boxColor = "",
     delay: boxDealy = 0,
-    isCommit: isBoxCommit,
+    isCommit: isBoxCommit = false,
   } = box;
 
   const isVertical = type === ETypeLine.VERTICAL;
   const isLast = col === BOARD_SIZE - (isVertical ? 0 : 1);
   const width = isVertical ? LINE_SIZE : TILE_SIZE;
   const height = isVertical ? TILE_SIZE : LINE_SIZE + 2;
+  const isLineSelected = state === ELineState.SELECTED;
+  const delayLineSelected = lineDelay * COMBINED_DELAY;
+  const isBoxCompleteAnimation = isBoxComplete && !isBoxCommit;
+  const delayBoxComplete = TIME_EXPAND_LINE + COMBINED_DELAY * boxDealy;
+
+  /**
+   * Línea
+   * Se usa el useCallback para evitar recreaciones innecesarias
+   */
+  useLineAndBoxSoundEffect({
+    condition: isLineSelected,
+    delayMs: delayLineSelected,
+    cb: useCallback(() => playSound(ESounds.STROKE), []),
+  });
+
+  // Caja...
+  useLineAndBoxSoundEffect({
+    condition: isBoxCompleteAnimation,
+    delayMs: delayBoxComplete,
+    cb: useCallback(() => playSound(ESounds.BOX), []),
+  });
 
   /**
    * Para saber si se muestra la caja (box)
@@ -85,22 +109,21 @@ const Line = ({
    * Si la línea está seleccionada, se establece el color de la misma
    * a través de las variable css
    */
-  if (state === ELineState.SELECTED) {
+  if (isLineSelected) {
     style["--line-color"] =
       `var(${lineColor === EBoardColor.BLUE ? "--line-blue" : "--line-red"})`;
 
     /**
      * Tiempo de espera para hacer la animación de la línea...
      */
-    style["--line-delay"] = `${lineDelay * COMBINED_DELAY}ms`;
+    style["--line-delay"] = `${delayLineSelected}ms`;
   }
 
-  if (isBoxComplete && !isBoxCommit) {
+  if (isBoxCompleteAnimation) {
     /**
      * Tiempo de espera para hacer la animación de la caja
      */
-    const animationBoxDelay = TIME_EXPAND_LINE + COMBINED_DELAY * boxDealy;
-    style["--box-delay"] = `${animationBoxDelay}ms`;
+    style["--box-delay"] = `${delayBoxComplete}ms`;
   }
 
   const title = `${type} Line, ${row} - ${col}`;
