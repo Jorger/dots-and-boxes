@@ -52,16 +52,3 @@ export enum ESounds {
   STROKE = "STROKE",
   BOX = "BOX",
 }
-
-document.documentElement.style.setProperty("--base-height", `${BASE_HEIGHT}px`);
-document.documentElement.style.setProperty("--base-width", `${BASE_WIDTH}px`);
-document.documentElement.style.setProperty("--tile-size", `${TILE_SIZE}px`);
-document.documentElement.style.setProperty("--line-size", `${LINE_SIZE}px`);
-document.documentElement.style.setProperty(
-  "--time-scale-up",
-  `${TIME_SCALE_UP}ms`
-);
-document.documentElement.style.setProperty(
-  "--time-expand-line",
-  `${TIME_EXPAND_LINE}ms`
-);

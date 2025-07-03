@@ -1,5 +1,10 @@
-import { EBoardColor, ELineState, ESounds, ETypeLine } from "../utils/constants";
 import { PlayerId, RuneClient, Player as PlayerRune } from "rune-sdk";
+import {
+  EBoardColor,
+  ELineState,
+  ESounds,
+  ETypeLine,
+} from "../utils/constants";
 
 declare global {
   const Rune: RuneClient<GameState, GameActions>;

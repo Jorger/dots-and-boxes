@@ -6,4 +6,12 @@ import Score from "./score";
 import ShowTurn from "./showTurn";
 import StartCounter from "./startCounter";
 
-export { GameWrapper, Grid, Line, OpponentThinks, Score, ShowTurn, StartCounter };
+export {
+  GameWrapper,
+  Grid,
+  Line,
+  OpponentThinks,
+  Score,
+  ShowTurn,
+  StartCounter,
+};
