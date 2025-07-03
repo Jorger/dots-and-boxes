@@ -46,6 +46,13 @@ export const INITIAL_UI_INTERACTIONS: IUInteractions = {
   delayUI: 0,
 };
 
+export enum ESounds {
+  COUNTER = "COUNTER",
+  WHISTLE = "WHISTLE",
+  STROKE = "STROKE",
+  BOX = "BOX",
+}
+
 document.documentElement.style.setProperty("--base-height", `${BASE_HEIGHT}px`);
 document.documentElement.style.setProperty("--base-width", `${BASE_WIDTH}px`);
 document.documentElement.style.setProperty("--tile-size", `${TILE_SIZE}px`);
